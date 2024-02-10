@@ -15,20 +15,20 @@ public class TicketController {
     @Autowired
     TicketService ticketService;
 
-    @PostMapping("/ajouterticekt")
+    /*@PostMapping("/ajouterticekt")
     public Ticket ajouterticket(@RequestBody Ticket ticket) {
         Ticket tick = ticketService.ajouterticket(ticket);
         return tick;
 
-    }
+    }*/
     @GetMapping("/afficherlestockets")
     public List<Ticket> afficherTicket(){
-
-
         return ticketService.getallticekts();
     }
 
 
+
+/*
     @PutMapping("/updateticket/{idticket}")
     public Ticket updateTicket(@PathVariable Long idticket, @RequestBody Ticket ticket) {
         //ticket.setIdticket(idticket);
@@ -38,6 +38,6 @@ public class TicketController {
     public void supprimierticket(@PathVariable Long idticket) {
         ticketService.supprimierticekt(idticket);
     }
-
+*/
 
 }

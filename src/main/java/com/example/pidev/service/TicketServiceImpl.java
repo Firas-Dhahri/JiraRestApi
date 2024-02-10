@@ -21,7 +21,7 @@ public class TicketServiceImpl implements  TicketService {
 
     private String username = "firas.dhahri@esprit.tn";
 
-    private String password="ATATT3xFfGF07IZZeRn2dRjyCPam8i7BY4rxxB5BHYr0GV-yBStmyxiO-y4faMci2ZCFJrFgEIaz8ajVufjLLoZZmY97fBOM9DSJQIRziIoSGyFZo663eYoQ-SLwe6NB7aP3fmP0wVyNcPHikAIh2H_SvmnOIlSwbkGMYG--2c5wiGHGs6KGYVA=DDB7C6FF";
+    private String password="ATATT3xFfGF0cP_FQjxFfk85vv-myeXkXs8JsgNgLMPHggCa7sU_FmtACVmwnmXiiJ046auIEXMesICQaHIGkGiS0KXNM2se1YNISIoJ0m1exdqbPhH1gu91CLb5NfJxc_zPmMRwGQrklAQCaG8cjSSzBJij5jvpZ_U_h11CUgY0cpjPuGh51MU=118F7255";
 
     private String domain= "firasdhahri";
     @Override
@@ -44,7 +44,10 @@ public class TicketServiceImpl implements  TicketService {
             if (response.getStatusCode() == HttpStatus.OK) {
                 JiraResponse jiraResponse = response.getBody();
                 if (jiraResponse != null) {
-                    return jiraResponse.getIssues();
+                    List<Ticket> ticket =jiraResponse.getIssues();
+                    ticketRepository.saveAll(jiraResponse.getIssues());
+                    return ticket;
+
                 } else {
                     System.out.println("Response body is null");
                 }

@@ -20,7 +20,7 @@ public class Ticket implements Serializable {
     private String self;
     private String key;
 
-    @Transient // This annotation tells JPA to ignore this field when mapping to the database
+    @Embedded
     private Fields fields;
 
     // Getter and setter for fields
@@ -32,35 +32,48 @@ public class Ticket implements Serializable {
         this.fields = fields;
     }
 
-    @Data // Lombok annotation for generating getters and setters
+    @Embeddable
+    @Data
     public static class Fields {
         private String summary;
         private String description;
+        @Embedded
         private Priority priority;
+        @Embedded
         private Status status;
+        @Embedded
         private Assignee assignee;
+        @Embedded
         private Reporter reporter;
         private String created;
         private String updated;
     }
 
-    @Data // Lombok annotation for generating getters and setters
+    @Embeddable
+    @Data
     public static class Priority {
+        @Column(name = "priority_name") // Unique column name for Priority name
         private String name;
     }
 
-    @Data // Lombok annotation for generating getters and setters
+    @Embeddable
+    @Data
     public static class Status {
+        @Column(name = "status_name") // Unique column name for Status name
         private String name;
     }
 
-    @Data // Lombok annotation for generating getters and setters
+    @Embeddable
+    @Data
     public static class Assignee {
+        @Column(name = "assignee_name") // Unique column name for Assignee name
         private String name;
     }
 
-    @Data // Lombok annotation for generating getters and setters
+    @Embeddable
+    @Data
     public static class Reporter {
+        @Column(name = "reporter_name") // Unique column name for Reporter name
         private String name;
     }
 }
