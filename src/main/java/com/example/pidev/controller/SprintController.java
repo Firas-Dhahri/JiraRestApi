@@ -1,6 +1,6 @@
 package com.example.pidev.controller;
 
-import com.example.pidev.entities.JiraResponse2;
+import com.example.pidev.dto.SprintResponseDto;
 import com.example.pidev.service.SprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +13,7 @@ public class SprintController {
     SprintService sprintService;
 
     @GetMapping("/affichersprint/{boardId}")
-    public JiraResponse2 afficherSprint(@PathVariable long boardId) {
+    public SprintResponseDto afficherSprint(@PathVariable long boardId) {
         return sprintService.getAllSprints(boardId);
     }
 }

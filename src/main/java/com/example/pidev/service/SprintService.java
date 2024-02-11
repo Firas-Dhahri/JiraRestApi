@@ -1,8 +1,8 @@
 package com.example.pidev.service;
 
-import com.example.pidev.entities.JiraResponse2;
+import com.example.pidev.dto.SprintResponseDto;
 
 public interface SprintService {
-    JiraResponse2 getAllSprints(long boardId);
+    SprintResponseDto getAllSprints(long boardId);
 
 }

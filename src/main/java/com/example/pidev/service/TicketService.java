@@ -9,12 +9,10 @@ public interface TicketService  {
 
 
     public List<Ticket> getallticekts();
+    public Ticket createIssue(String key, String issueType, String summary, String description) ;
 
-    Ticket ajouterticket (Ticket ticket);
+    public String createProject(String projectName);
 
-    Ticket modifierticket(Ticket ticket);
-
-    public void supprimierticekt(Long idticket);
 
 
 

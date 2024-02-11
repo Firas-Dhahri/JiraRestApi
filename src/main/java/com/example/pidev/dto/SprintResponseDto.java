@@ -1,21 +1,18 @@
-package com.example.pidev.entities;
+package com.example.pidev.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.example.pidev.entities.Sprint;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 //@JsonIgnoreProperties(ignoreUnknown = true)
-public class JiraResponse2 {
+public class SprintResponseDto {
     private List<Sprint> values;
-
-
-
-
     public  List<Sprint>getSprint(){return  values ;}
 
     public void setSprint(List<Sprint> sprint) {
         this.values = sprint;
     }
+
 }
