@@ -35,7 +35,7 @@ public class TicketController {
                               @RequestParam String description) {
         return ticketService.addIssue(key ,issueType, summary, description);
     }*/
-    @PostMapping("/createIssue")
+   @PostMapping("/createIssue")
     public ResponseEntity<Ticket> createIssue(
             @RequestParam String key,
             @RequestParam String issueType,
@@ -48,6 +48,13 @@ public class TicketController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @PutMapping("/{key}")
+    public Ticket updateTicket(@PathVariable String key,
+                               @RequestParam(required = false) String summary,
+                               @RequestParam(required = false) String description) {
+        return ticketService.updateIssueByKey(key, summary, description);
+    }
+
 
     @PostMapping("/createproj")
     public ResponseEntity<String> createProject(@RequestParam String projectName) {
@@ -58,7 +65,18 @@ public class TicketController {
             return new ResponseEntity<>("Failed to create project", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @DeleteMapping("/{issueKey}")
+    public ResponseEntity<String> deleteIssue(@PathVariable String issueKey) {
+        boolean deleted = ticketService.deleteIssue(issueKey);
+        if (deleted) {
+            return ResponseEntity.ok().body("Issue with key " + issueKey + " has been deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete issue with key " + issueKey + ".");
+        }
+    }
 }
+
 
 
 

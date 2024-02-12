@@ -13,6 +13,9 @@ public interface TicketService  {
 
     public String createProject(String projectName);
 
+    public Ticket updateIssueByKey(String issueKey, String summary, String description) ;
+
+    public boolean deleteIssue(String issueKey) ;
 
 
 
@@ -20,4 +23,7 @@ public interface TicketService  {
 
 
 
-}
+
+
+
+    }

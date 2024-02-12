@@ -4,6 +4,7 @@ package com.example.pidev.service;
 import com.example.pidev.dto.SprintResponseDto;
 import com.example.pidev.repository.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,11 +13,17 @@ import org.springframework.web.client.RestTemplate;
 public class SprintServiceImpl implements SprintService{
     @Autowired
     SprintRepository sprintRepository;
-    private String username = "firas.dhahri@esprit.tn";
+    //private String username = "firas.dhahri@esprit.tn";
+    @Value("${nom.de.utlisateur}")
+    private String username;
 
-    private String password="ATATT3xFfGF08ptwyWCsPIXe1lptgddAdwActSkgqU4K_frCy_6wiTElK3rJCw_40tWoVM6T7IaTPYgpCGptZltlDyCH5hxDlyVHZ9ZzXUXEN-NSkxgpKXJrXmxsVDcN00ZFwoWdh_I9uT3yrSWkfjmmMFa-sHGr0LblNABZfdQS9zlEnnrogaQ=9FBD91C7";
+    //private String password="ATATT3xFfGF0s92En9BY91fID25VHAbGYPEDWIhrRWHXmWQm_MH0cNsp2ppQuvpL2Lx3WsHyRKWnIfMgDAMCpsX7xQ3WoC0jCEibD7KysIviNpjtJN35t2ZFwJy1hii-S_EBlC_4JtdpnSI9h9IMezZDDEN1qQY4_HoPtcmZdH8z81RLF1h7oSU=D15021E8";
+    @Value("${api.token}")
+    private String password;
+    //private String domain= "firasdhahri";
+    @Value("${domain.name}")
+    private String domain;
 
-    private String domain= "firasdhahri";
     @Override
     public SprintResponseDto getAllSprints(long boardId) {
             try  {
