@@ -23,7 +23,6 @@ public class TicketServiceImpl implements  TicketService {
     @Value("${nom.de.utlisateur}")
     private String username;
 
-    //private String password="ATATT3xFfGF0s92En9BY91fID25VHAbGYPEDWIhrRWHXmWQm_MH0cNsp2ppQuvpL2Lx3WsHyRKWnIfMgDAMCpsX7xQ3WoC0jCEibD7KysIviNpjtJN35t2ZFwJy1hii-S_EBlC_4JtdpnSI9h9IMezZDDEN1qQY4_HoPtcmZdH8z81RLF1h7oSU=D15021E8";
     @Value("${api.token}")
     private String password;
     //private String domain= "firasdhahri";

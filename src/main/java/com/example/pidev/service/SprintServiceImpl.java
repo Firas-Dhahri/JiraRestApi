@@ -2,6 +2,7 @@ package com.example.pidev.service;
 
 
 import com.example.pidev.dto.SprintResponseDto;
+import com.example.pidev.entities.Sprint;
 import com.example.pidev.repository.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,6 @@ public class SprintServiceImpl implements SprintService{
     @Value("${nom.de.utlisateur}")
     private String username;
 
-    //private String password="ATATT3xFfGF0s92En9BY91fID25VHAbGYPEDWIhrRWHXmWQm_MH0cNsp2ppQuvpL2Lx3WsHyRKWnIfMgDAMCpsX7xQ3WoC0jCEibD7KysIviNpjtJN35t2ZFwJy1hii-S_EBlC_4JtdpnSI9h9IMezZDDEN1qQY4_HoPtcmZdH8z81RLF1h7oSU=D15021E8";
     @Value("${api.token}")
     private String password;
     //private String domain= "firasdhahri";
@@ -57,5 +57,44 @@ public class SprintServiceImpl implements SprintService{
         return null; // Return null if there's an error
     }
 
-}
+    @Override
+    public Sprint createSprint(long boardId, String name, String startDate, String endDate,String goal) {
+        try {
+            String baseUrl = "https://" + domain + ".atlassian.net/rest/agile/1.0/sprint";
+            String auth = username + ":" + password;
+            byte[] authBytes = auth.getBytes();
+            String base64Creds = java.util.Base64.getEncoder().encodeToString(authBytes);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", "Basic " + base64Creds);
+
+            // Construct the request body
+            String requestBody = "{" +
+                    "\"originBoardId\": \"" + boardId + "\", " +
+                    "\"name\": \"" + name + "\", " +
+                    "\"startDate\": \"" + startDate + "\", " +
+                    "\"goal\": \"" + goal + "\", " +
+                    "\"endDate\": \"" + endDate + "\"}";
+
+            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Sprint> response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, Sprint.class);
+            if (response.getStatusCode() == HttpStatus.CREATED) {
+                Sprint sprint = response.getBody();
+                if (sprint != null) {
+                    return sprint;
+                } else {
+                    System.out.println("Created sprint response body is null");
+                }
+            } else {
+                System.out.println("Failed to create sprint. Status code: " + response.getStatusCodeValue());
+            }
+        } catch (Exception e) {
+            System.out.println("Error creating sprint: " + e.getMessage());
+        }
+        return null;
+    }    }
+
+
 
