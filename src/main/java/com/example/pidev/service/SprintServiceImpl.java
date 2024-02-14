@@ -94,7 +94,78 @@ public class SprintServiceImpl implements SprintService{
             System.out.println("Error creating sprint: " + e.getMessage());
         }
         return null;
-    }    }
+    }
+
+    @Override
+    public Sprint updateSprint(long sprintId, String name, String startDate, String endDate, String goal,Long boardId, String state,String createdDate) {
+        try {
+            String baseUrl = "https://" + domain + ".atlassian.net/rest/agile/1.0/sprint/" + sprintId;
+            String auth = username + ":" + password;
+            byte[] authBytes = auth.getBytes();
+            String base64Creds = java.util.Base64.getEncoder().encodeToString(authBytes);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", "Basic " + base64Creds);
+
+            // Construct the request body
+            String requestBody = "{" +
+                    "\"originBoardId\": \"" + boardId + "\", " +
+                    "\"self\": \"" + baseUrl + "\", " +
+                    "\"state\": \"" + state + "\", " +
+                    "\"id\": \"" + sprintId + "\", " +
+                    "\"createdDate\": \"" + createdDate + "\", " +
+                    "\"name\": \"" + name + "\", " +
+                    "\"startDate\": \"" + startDate + "\", " +
+                    "\"goal\": \"" + goal + "\", " +
+                    "\"endDate\": \"" + endDate + "\"}";
+
+            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Sprint> response = restTemplate.exchange(baseUrl, HttpMethod.PUT, entity, Sprint.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                Sprint sprint = response.getBody();
+                if (sprint != null) {
+                    return sprint;
+                } else {
+                    System.out.println("Updated sprint response body is null");
+                }
+            } else {
+                System.out.println("Failed to update sprint. Status code: " + response.getStatusCodeValue());
+            }
+        } catch (Exception e) {
+            System.out.println("Error updating sprint: " + e.getMessage());
+        }
+        return null;
+
+    }
+    @Override
+    public boolean deleteSprint(long sprintId) {
+        try {
+            String baseUrl = "https://" + domain + ".atlassian.net/rest/agile/1.0/sprint/" + sprintId;
+            String auth = username + ":" + password;
+            byte[] authBytes = auth.getBytes();
+            String base64Creds = java.util.Base64.getEncoder().encodeToString(authBytes);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", "Basic " + base64Creds);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Void> response = restTemplate.exchange(baseUrl, HttpMethod.DELETE, entity, Void.class);
+            if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+                return  true;
+            } else {
+                return  false;
+            }
+        } catch (Exception e) {
+            return  false;
+        }
+
+    }
+
+}
 
 
 
