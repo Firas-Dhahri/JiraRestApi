@@ -27,5 +27,8 @@ public class Sprint implements Serializable {
     private String goal;
 
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "ticket_idticket")
+    private Ticket ticket;
 
 }

@@ -1,6 +1,7 @@
 package com.example.pidev.service;
 
 
+import com.example.pidev.dto.TicketDto;
 import com.example.pidev.dto.TicketResponseDto;
 import com.example.pidev.entities.Ticket;
 import com.example.pidev.repository.TicketRepository;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TicketServiceImpl implements  TicketService {
+public class TicketServiceImpl implements TicketService {
     @Autowired
     TicketRepository ticketRepository;
 
@@ -29,7 +30,7 @@ public class TicketServiceImpl implements  TicketService {
     @Value("${domain.name}")
     private String domain;
 
-    private String projectKey = "SALAM";
+    //private String projectKey = "SALAM";
     private String projectLead = "712020:286e61dc-4de8-4dd8-b55c-daee6fd45fb4";
 
     @Override
@@ -81,44 +82,44 @@ public class TicketServiceImpl implements  TicketService {
     }
 
 
+    @Override
+    public Ticket createIssue(TicketDto ticketDto) {
+        try {
+            String baseUrl = "https://" + domain + ".atlassian.net/rest/api/2/issue";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBasicAuth(username, password);
+            // sprintname = ticketRepository.findTicketBySprints(name)
+            String requestBody = "{\"fields\": {" +
+                    "\"project\": {\"key\": \"" + ticketDto.getKey() + "\"}," +
+                    "\"summary\": \"" + ticketDto.getFields().getSummary() + "\"," +
+                    "\"description\": \"" + ticketDto.getFields().getDescription() + "\"," +
+                    "\"issuetype\": {\"name\": \"" + ticketDto.getIssueType() + "\"}" +
+                    "}}";
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Ticket> response = restTemplate.exchange(baseUrl, HttpMethod.POST, requestEntity, Ticket.class);
+            if (response.getStatusCode() == HttpStatus.CREATED) {
+                Ticket createdIssue = response.getBody();
+                if (createdIssue != null) {
+                    return createdIssue;
+                } else {
+                    System.out.println("Created issue response body is null");
+                }
+            } else {
+                System.out.println("Failed to create issue. Status code: " + response.getStatusCodeValue());
+            }
+        } catch (Exception e) {
+            System.out.println("Error creating issue: " + e.getMessage());
+        }
+        return null;
+    }
 
     @Override
-   public Ticket createIssue(String key, String issueType, String summary, String description) {
-       try {
-           String baseUrl = "https://" + domain + ".atlassian.net/rest/api/2/issue";
-
-           HttpHeaders headers = new HttpHeaders();
-           headers.setContentType(MediaType.APPLICATION_JSON);
-           headers.setBasicAuth(username, password);
-
-           String requestBody = "{\"fields\": {" +
-                   "\"project\": {\"key\": \"" + key + "\"}," +
-                   "\"summary\": \"" + summary + "\"," +
-                   "\"description\": \"" + description + "\"," +
-                   "\"issuetype\": {\"name\": \"" + issueType + "\"}" +
-                   "}}";
-
-           HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-           RestTemplate restTemplate = new RestTemplate();
-           ResponseEntity<Ticket> response = restTemplate.exchange(baseUrl, HttpMethod.POST, requestEntity, Ticket.class);
-           if (response.getStatusCode() == HttpStatus.CREATED) {
-               Ticket createdIssue = response.getBody();
-               if (createdIssue != null) {
-                   return createdIssue;
-               } else {
-                   System.out.println("Created issue response body is null");
-               }
-           } else {
-               System.out.println("Failed to create issue. Status code: " + response.getStatusCodeValue());
-           }
-       } catch (Exception e) {
-           System.out.println("Error creating issue: " + e.getMessage());
-       }
-       return null;
-   }
-    @Override
-    public String createProject(String projectName) {
+    public String createProject(String projectKey, String projectName) {
         try {
             String baseUrl = "https://" + domain + ".atlassian.net/rest/api/3/project";
             String auth = username + ":" + password;
@@ -208,7 +209,7 @@ public class TicketServiceImpl implements  TicketService {
         }
         return false;
     }
-    }
+}
 
 
 

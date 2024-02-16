@@ -3,6 +3,8 @@ package com.example.pidev.dto;
 import com.example.pidev.entities.Sprint;
 import com.example.pidev.entities.Ticket;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

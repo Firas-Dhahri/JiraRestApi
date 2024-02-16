@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -23,6 +25,9 @@ public class Ticket implements Serializable {
 
     @Embedded
     private Fields fields;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Sprint> sprints = new ArrayList<>();
 
     // Getter and setter for fields
     public Fields getFields() {
