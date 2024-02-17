@@ -19,7 +19,6 @@ public class Ticket implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idticket")
     private Long id;
-
     private String self;
     private String key;
 
@@ -38,8 +37,13 @@ public class Ticket implements Serializable {
         this.fields = fields;
     }
 
+    public void setSprint(Sprint sprint) {
+    }
+
     @Embeddable
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Fields {
         private String summary;
         private String description;

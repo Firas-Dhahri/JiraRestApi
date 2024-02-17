@@ -18,6 +18,9 @@ public interface TicketService  {
 
     public boolean deleteIssue(String issueKey) ;
 
+    void affectTicketsToSprint(long sprintId, List<Long> ticketIds);
+
+    //public void updateSprintFieldInJira(String ticketKey, String sprintName) ;
 
 
 

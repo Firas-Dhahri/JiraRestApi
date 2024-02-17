@@ -25,7 +25,7 @@ public class TicketController {
         return tick;
 
     }*/
-    @GetMapping("/afficherlestockets")
+    @GetMapping("/afficherlestickets")
     public List<Ticket> afficherTicket() {
         return ticketService.getallticekts();
     }

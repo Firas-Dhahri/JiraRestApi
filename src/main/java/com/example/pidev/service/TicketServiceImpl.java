@@ -3,12 +3,15 @@ package com.example.pidev.service;
 
 import com.example.pidev.dto.TicketDto;
 import com.example.pidev.dto.TicketResponseDto;
+import com.example.pidev.entities.Sprint;
 import com.example.pidev.entities.Ticket;
+import com.example.pidev.repository.SprintRepository;
 import com.example.pidev.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.http.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -32,6 +35,8 @@ public class TicketServiceImpl implements TicketService {
 
     //private String projectKey = "SALAM";
     private String projectLead = "712020:286e61dc-4de8-4dd8-b55c-daee6fd45fb4";
+    @Autowired
+    private SprintRepository sprintRepository;
 
     @Override
     public List<Ticket> getallticekts() {
@@ -82,41 +87,44 @@ public class TicketServiceImpl implements TicketService {
     }
 
 
-    @Override
-    public Ticket createIssue(TicketDto ticketDto) {
-        try {
-            String baseUrl = "https://" + domain + ".atlassian.net/rest/api/2/issue";
+           @Override
+        public Ticket createIssue(TicketDto ticketDto) {
+            try {
+                String baseUrl = "https://" + domain + ".atlassian.net/rest/api/2/issue";
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBasicAuth(username, password);
-            // sprintname = ticketRepository.findTicketBySprints(name)
-            String requestBody = "{\"fields\": {" +
-                    "\"project\": {\"key\": \"" + ticketDto.getKey() + "\"}," +
-                    "\"summary\": \"" + ticketDto.getFields().getSummary() + "\"," +
-                    "\"description\": \"" + ticketDto.getFields().getDescription() + "\"," +
-                    "\"issuetype\": {\"name\": \"" + ticketDto.getIssueType() + "\"}" +
-                    "}}";
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBasicAuth(username, password);
+                String requestBody = "{\"fields\": {" +
+                        "\"project\": {\"key\": \"" + ticketDto.getKey() + "\"}," +
+                        "\"summary\": \"" + ticketDto.getFields().getSummary() + "\"," +
+                        "\"description\": \"" + ticketDto.getFields().getDescription() + "\"," +
+                        "\"issuetype\": {\"name\": \"" + ticketDto.getIssueType() + "\"}" +
+                        "}}";
 
-            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+                HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<Ticket> response = restTemplate.exchange(baseUrl, HttpMethod.POST, requestEntity, Ticket.class);
-            if (response.getStatusCode() == HttpStatus.CREATED) {
-                Ticket createdIssue = response.getBody();
-                if (createdIssue != null) {
-                    return createdIssue;
+                RestTemplate restTemplate = new RestTemplate();
+                ResponseEntity<Ticket> response = restTemplate.exchange(baseUrl, HttpMethod.POST, requestEntity, Ticket.class);
+                if (response.getStatusCode() == HttpStatus.CREATED) {
+                    Ticket createdIssue = response.getBody();
+                    if (createdIssue != null) {
+                        ticketRepository.save(createdIssue);
+                        return createdIssue;
+                    } else {
+                        System.out.println("Created issue response body is null");
+                    }
                 } else {
-                    System.out.println("Created issue response body is null");
+                    System.out.println("Failed to create issue. Status code: " + response.getStatusCodeValue());
                 }
-            } else {
-                System.out.println("Failed to create issue. Status code: " + response.getStatusCodeValue());
+            } catch (Exception e) {
+                System.out.println("Error creating issue: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.out.println("Error creating issue: " + e.getMessage());
+            return null;
         }
-        return null;
-    }
+
+
+
 
     @Override
     public String createProject(String projectKey, String projectName) {
@@ -209,7 +217,26 @@ public class TicketServiceImpl implements TicketService {
         }
         return false;
     }
-}
+
+    @Override
+    @Transactional
+    public void affectTicketsToSprint(long sprintId, List<Long> ticketIds) {
+        Optional<Sprint> optionalSprint = sprintRepository.findById(sprintId);
+        if (optionalSprint.isEmpty()) {
+            throw new IllegalArgumentException("Sprint with ID " + sprintId + " not found.");
+        }
+        Sprint sprint = optionalSprint.get();
+
+        List<Ticket> tickets = ticketRepository.findAllById(ticketIds);
+        for (Ticket ticket : tickets) {
+            ticket.setSprint(sprint);
+            ticketRepository.save(ticket);
+
+        }
+    }
+
+    }
+
 
 
 

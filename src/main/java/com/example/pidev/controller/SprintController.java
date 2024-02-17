@@ -4,15 +4,20 @@ import com.example.pidev.dto.SprintResponseDto;
 import com.example.pidev.entities.Sprint;
 import com.example.pidev.entities.Ticket;
 import com.example.pidev.service.SprintService;
+import com.example.pidev.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class SprintController {
     @Autowired
     SprintService sprintService;
+    @Autowired
+    TicketService ticketService;
 
     @GetMapping("/affichersprint/{boardId}")
     public SprintResponseDto afficherSprint(@PathVariable long boardId) {
@@ -59,6 +64,18 @@ public class SprintController {
                     .body("Failed to delete sprint with key " + sprintId + ".");
         }
     }
+    @PutMapping("/{sprintId}/tickets")
+    public ResponseEntity<String> associateTicketsWithSprint(@PathVariable("sprintId") long sprintId, @RequestBody List<Long> ticketIds) {
+        try {
+            ticketService.affectTicketsToSprint(sprintId, ticketIds);
+            return ResponseEntity.ok("Tickets associated with sprint successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while associating tickets with sprint.");
+        }
+    }
+
 }
 
 
