@@ -1,22 +1,19 @@
 package com.example.pidev.dto;
 
-import com.example.pidev.entities.Sprint;
 import com.example.pidev.entities.Ticket;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.springframework.web.bind.annotation.RequestParam;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Getter
+@Setter
 public class TicketResponseDto {
-    private List<Ticket> issues;
+    private Ticket issues;
 
-        public List<Ticket> getIssues() {
-        return issues;
-    }
-    public void setIssues(List<Ticket> issues) {
-        this.issues = issues;
-    }
+
 
 
 }

@@ -1,7 +1,8 @@
 package com.example.pidev.controller;
 
 
-import com.example.pidev.dto.TicketDto;
+import com.example.pidev.dto.TicketCreationDto;
+import com.example.pidev.dto.TicketGetDto;
 import com.example.pidev.entities.Ticket;
 import com.example.pidev.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,8 @@ public class TicketController {
         return ticketService.addIssue(key ,issueType, summary, description);
     }*/
    @PostMapping("/createIssue")
-    public ResponseEntity<Ticket> createIssue(@RequestBody TicketDto ticketDto) {
-        Ticket createdIssue = ticketService.createIssue(ticketDto);
+    public ResponseEntity<TicketGetDto> createIssue(@RequestBody TicketCreationDto ticketCreationDto) {
+       TicketGetDto createdIssue = ticketService.createIssue(ticketCreationDto);
         if (createdIssue != null) {
             return new ResponseEntity<>(createdIssue, HttpStatus.CREATED);
         } else {
