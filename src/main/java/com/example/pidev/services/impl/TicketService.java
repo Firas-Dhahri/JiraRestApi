@@ -1,15 +1,15 @@
-package com.example.pidev.service;
+package com.example.pidev.services.impl;
 
 
 import com.example.pidev.dto.TicketCreationDto;
 import com.example.pidev.dto.ListTicketResponseDto;
 import com.example.pidev.dto.TicketGetDto;
-import com.example.pidev.dto.TicketResponseDto;
 import com.example.pidev.dto.modelMapper.TicketMapper;
 import com.example.pidev.entities.Sprint;
 import com.example.pidev.entities.Ticket;
 import com.example.pidev.repository.SprintRepository;
 import com.example.pidev.repository.TicketRepository;
+import com.example.pidev.services.Interface.ITicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TicketServiceImpl implements TicketService {
+public class TicketService implements ITicketService {
     @Autowired
     TicketRepository ticketRepository;
     @Autowired
@@ -57,13 +57,10 @@ public class TicketServiceImpl implements TicketService {
             headers.add("Authorization", "Basic " + base64Creds);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<ListTicketResponseDto> response = restTemplate.exchange(baseUrl, HttpMethod.GET, entity, ListTicketResponseDto.class);
-
             if (response.getStatusCode() == HttpStatus.OK) {
                 ListTicketResponseDto listTicketResponseDto = response.getBody();
-
                 if (listTicketResponseDto != null) {
                     List<Ticket> fetchedTickets = listTicketResponseDto.getIssues();
                     for (Ticket ticket : fetchedTickets) {
@@ -91,7 +88,7 @@ public class TicketServiceImpl implements TicketService {
         return tickets;
     }
 
-    public Ticket getTicektById(String key) {
+    public TicketGetDto getTicektById(String key) {
 //        List<Ticket> tickets = new ArrayList<>();
         try {
             String baseUrl = "https://" + domain + ".atlassian.net/rest/api/2/issue/" + key;
@@ -106,15 +103,13 @@ public class TicketServiceImpl implements TicketService {
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<TicketResponseDto> response = restTemplate.exchange(baseUrl, HttpMethod.GET, entity, TicketResponseDto.class);
+            ResponseEntity<TicketGetDto> response = restTemplate.exchange(baseUrl, HttpMethod.GET, entity, TicketGetDto.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                TicketResponseDto ticketResponseDto = response.getBody();
+                TicketGetDto ticketResponseDto = response.getBody();
 
                 if (ticketResponseDto != null) {
-                    return ticketResponseDto.getIssues();
-
-
+                    return ticketResponseDto;
                 } else {
                     System.out.println("Response body is null");
                 }
@@ -133,7 +128,6 @@ public class TicketServiceImpl implements TicketService {
     public TicketGetDto createIssue(TicketCreationDto ticketCreationDto) {
         try {
             String baseUrl = "https://" + domain + ".atlassian.net/rest/api/2/issue";
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBasicAuth(username, password);
@@ -144,11 +138,10 @@ public class TicketServiceImpl implements TicketService {
                     "\"description\": \"" + ticketCreationDto.getFields().getDescription() + "\"," +
                     "\"issuetype\": {\"name\": \"" + ticketCreationDto.getFields().getIssuetype().getName() + "\"}" +
                     "}}";
-
             HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<Ticket> response = restTemplate.exchange(baseUrl, HttpMethod.POST, requestEntity, Ticket.class);
+
             if (response.getStatusCode() == HttpStatus.CREATED) {
                 Ticket createdIssue = response.getBody();
                  final String keyToFind = createdIssue.getKey();
@@ -173,6 +166,56 @@ public class TicketServiceImpl implements TicketService {
         }
         return null;
     }
+    @Transactional
+    @Override
+    public TicketGetDto updateIssueByKey(String issueKey, TicketCreationDto ticketCreationDto) {
+        try {
+            String baseUrl = "https://" + domain + ".atlassian.net/rest/api/2/issue/" + issueKey;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBasicAuth(username, password);
+
+            String requestBody = "{\"fields\":{" +
+                    "\"summary\":\"" + ticketCreationDto.getFields().getSummary() + "\"," +
+                    "\"description\":\"" + ticketCreationDto.getFields().getDescription() + "\"," +
+                    "\"issuetype\":{\"name\":\"" + ticketCreationDto.getFields().getIssuetype().getName() + "\"}," +
+                    "\"customfield_10016\":" + ticketCreationDto.getFields().getCustomfield_10016() +
+                    "}}";
+            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Ticket> response = restTemplate.exchange(baseUrl, HttpMethod.PUT, requestEntity, Ticket.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // Update existing ticket with new data
+                Optional<Ticket> optionalTicket = getallticekts().stream()
+                        .filter(ticket -> ticket.getKey().equals(issueKey))
+                        .findFirst();
+                if (optionalTicket.isPresent()) {
+                    Ticket existingTicket = optionalTicket.get();
+                    // Accessing the Fields object within Ticket
+                    Ticket.Fields existingFields = existingTicket.getFields();
+
+                    // Update fields with new data
+                    existingFields.setSummary(ticketCreationDto.getFields().getSummary());
+                    existingFields.setDescription(ticketCreationDto.getFields().getDescription());
+
+                    // Save the updated ticket back to the database
+                    Ticket savedTicked = ticketRepository.save(existingTicket);
+                    TicketGetDto ticketGetDto = ticketMapper.toDto(savedTicked);
+                    return ticketGetDto;
+                } else {
+                    System.out.println("Failed to find existing issue with key: " + issueKey);
+                }
+            } else {
+                System.out.println("Failed to update issue. Status code: " + response.getStatusCodeValue());
+            }
+        } catch (Exception e) {
+            System.out.println("Error updating issue: " + e.getMessage());
+        }
+        return null;
+    }
+
+
 
 
     @Override
@@ -208,39 +251,7 @@ public class TicketServiceImpl implements TicketService {
         return null;
     }
 
-    @Override
-    public Ticket updateIssueByKey(String issueKey, String summary, String description) {
-        try {
-            String baseUrl = "https://" + domain + ".atlassian.net/rest/api/2/issue/" + issueKey;
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBasicAuth(username, password);
-
-            String requestBody = "{\"fields\": {" +
-                    "\"summary\": \"" + summary + "\"," +
-                    "\"description\": \"" + description + "\"" +
-                    "}}";
-
-            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<Ticket> response = restTemplate.exchange(baseUrl, HttpMethod.PUT, requestEntity, Ticket.class);
-            if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
-                Ticket updatedIssue = response.getBody();
-                if (updatedIssue != null) {
-                    return updatedIssue;
-                } else {
-                    System.out.println("Updated issue response body is null");
-                }
-            } else {
-                System.out.println("Failed to update issue. Status code: " + response.getStatusCodeValue());
-            }
-        } catch (Exception e) {
-            System.out.println("Error updating issue: " + e.getMessage());
-        }
-        return null;
-    }
 
     @Override
     public boolean deleteIssue(String issueKey) {

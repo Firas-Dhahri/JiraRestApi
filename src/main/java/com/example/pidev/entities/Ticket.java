@@ -20,7 +20,6 @@ public class Ticket implements Serializable {
     private String self;
     private String key;
     @Embedded
-
     private Fields fields;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)

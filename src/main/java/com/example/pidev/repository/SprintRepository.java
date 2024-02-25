@@ -9,4 +9,7 @@ public interface SprintRepository extends JpaRepository<Sprint,Long> {
 
     @Query("SELECT s.id FROM Sprint s WHERE s.name = :sprintName")
     Long getSprintIdByName(@Param("sprintName") String sprintName);
-    }
+
+    boolean existsByName(String name);
+
+}

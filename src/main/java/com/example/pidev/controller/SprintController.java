@@ -1,10 +1,10 @@
 package com.example.pidev.controller;
 
-import com.example.pidev.dto.SprintResponseDto;
+import com.example.pidev.dto.*;
 import com.example.pidev.entities.Sprint;
-import com.example.pidev.entities.Ticket;
-import com.example.pidev.service.SprintService;
-import com.example.pidev.service.TicketService;
+import com.example.pidev.services.Interface.ISprintService;
+import com.example.pidev.services.impl.SprintService;
+import com.example.pidev.services.impl.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequestMapping("/sprints")
+@CrossOrigin(origins = "http://localhost:4200/")
 @RestController
 public class SprintController {
     @Autowired
@@ -20,41 +22,25 @@ public class SprintController {
     TicketService ticketService;
 
     @GetMapping("/affichersprint/{boardId}")
-    public SprintResponseDto afficherSprint(@PathVariable long boardId) {
+    public List <Sprint> afficherSprint(@PathVariable long boardId) {
         return sprintService.getAllSprints(boardId);
     }
 
-    @PostMapping("/ajoutersprint/{boardId}")
-    public ResponseEntity<Sprint> createSprint(@PathVariable long boardId,
-                                               @RequestParam String name,
-                                               @RequestParam String startDate,
-                                               @RequestParam String goal,
-                                               @RequestParam String endDate) {
-        Sprint createdSprint = sprintService.createSprint(boardId, name, startDate, endDate,goal);
+    @PostMapping("/ajoutersprint")
+    public ResponseEntity<SprintGetDto> createSprint(@RequestBody SprintCreationDto sprintCreationDto   ) {
+        SprintGetDto createdSprint = sprintService.createSprint(sprintCreationDto);
         if (createdSprint != null) {
             return new ResponseEntity<>(createdSprint, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @PutMapping("update/{sprintId}")
-    public ResponseEntity<Sprint> updateSprint(
-            @PathVariable Long sprintId,
-            @RequestParam(required = false) Long  boardId,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
-            @RequestParam(required = false) String state,
-            @RequestParam(required = false) String createdDate,
-                        @RequestParam(required = false) String goal) {
-        Sprint sprint = sprintService.updateSprint(sprintId, name, startDate, endDate, goal, boardId,state,createdDate);
-        if (sprint != null) {
-            return new ResponseEntity<>(sprint, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @PutMapping("/update/{sprintId}")
+    public SprintGetDto updateSprint(@PathVariable Long sprintId ,@RequestBody SprintCreationDto sprintCreationDto) {
+            return sprintService.updateSprint(sprintId, sprintCreationDto);
     }
-    @DeleteMapping("/{sprintId}")
+
+    @DeleteMapping("/delete/{sprintId}")
     public ResponseEntity<String> deleteIssue(@PathVariable Long sprintId) {
         boolean deleted = sprintService.deleteSprint(sprintId);
         if (deleted) {
@@ -74,6 +60,10 @@ public class SprintController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while associating tickets with sprint.");
         }
+    }
+    @GetMapping("/getProjectName")
+    public List<String> getAllBoardName() {
+        return sprintService.getAllBoardName();
     }
 
 }

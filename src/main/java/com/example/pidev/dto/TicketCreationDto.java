@@ -1,10 +1,7 @@
 package com.example.pidev.dto;
 
 import com.example.pidev.entities.Ticket;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -32,6 +29,7 @@ public class TicketCreationDto implements Serializable {
         IssuetypeDto issuetype;
         String description;
         PriorityDto priority;
+
 
         /**
          * DTO for {@link Ticket.Fields.Issuetype}
